@@ -223,7 +223,7 @@ resource "aws_instance" "web_server_1" {
   instance_type          = "t2.micro"
   subnet_id              = aws_subnet.public_subnet_1.id
   vpc_security_group_ids = [aws_security_group.web_sg.id]
-  key_name               = "your-key-pair-name"  # Create key pair first
+  key_name               = "sample-25-11-2005"  # Create key pair first
 
   user_data = <<-EOF
               #!/bin/bash
@@ -243,7 +243,7 @@ resource "aws_instance" "web_server_2" {
   instance_type          = "t2.micro"
   subnet_id              = aws_subnet.public_subnet_2.id
   vpc_security_group_ids = [aws_security_group.web_sg.id]
-  key_name               = "your-key-pair-name"  # Create key pair first
+  key_name               = "sample-25-11-2005"  # Create key pair first
 
   user_data = <<-EOF
               #!/bin/bash
