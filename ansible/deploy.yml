@@ -1,1 +1,80 @@
-deploy
+---
+- name: Configure Web Servers
+  hosts: webservers
+  become: yes
+  
+  tasks:
+    - name: Update system packages
+      yum:
+        name: '*'
+        state: latest
+        update_cache: yes
+      
+    - name: Install Apache and PHP
+      yum:
+        name:
+          - httpd
+          - php
+          - php-mysqlnd
+          - php-cli
+          - git
+        state: present
+    
+    - name: Start and enable Apache
+      systemd:
+        name: httpd
+        state: started
+        enabled: yes
+    
+    - name: Remove default Apache content
+      file:
+        path: /var/www/html/index.html
+        state: absent
+    
+    - name: Clone application repository
+      git:
+        repo: 'https://github.com/vigneshms0411/aws-capstone-exam.git'
+        dest: /tmp/app
+        version: main
+        force: yes
+    
+    - name: Copy application files
+      copy:
+        src: /tmp/app/index.php
+        dest: /var/www/html/index.php
+        remote_src: yes
+        owner: apache
+        group: apache
+        mode: '0644'
+    
+    - name: Copy db_check.php
+      copy:
+        src: /tmp/app/db_check.php
+        dest: /var/www/html/db_check.php
+        remote_src: yes
+        owner: apache
+        group: apache
+        mode: '0644'
+    
+    - name: Create environment file for DB connection
+      copy:
+        dest: /var/www/html/.env
+        content: |
+          DB_HOST={{ db_host }}
+          DB_USER={{ db_user }}
+          DB_PASS={{ db_pass }}
+          DB_NAME={{ db_name }}
+        owner: apache
+        group: apache
+        mode: '0640'
+    
+    - name: Update db_check.php to use environment variables
+      lineinfile:
+        path: /var/www/html/db_check.php
+        regexp: '^(\$servername|$username|$password|$dbname)'
+        state: absent
+    
+    - name: Restart Apache
+      systemd:
+        name: httpd
+        state: restarted
